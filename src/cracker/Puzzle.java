@@ -7,10 +7,10 @@ package cracker;
  */
 public class Puzzle {
 	
-	private static final int PUZZLE_SIZE = 5;
+	private static final int PUZZLE_SIZE = 7;
 	boolean [][] puzzle;
 	int[][] moves;
-	int numMoves, numFilled;
+	int numMoves, numFilled, minNumFilled, maxFilled, totalMoves;
 	
 	/**
 	 * Constructor
@@ -26,8 +26,10 @@ public class Puzzle {
 	 */
 	public void initBoard() {
 		puzzle = new boolean[ PUZZLE_SIZE ][ PUZZLE_SIZE ];
-		puzzle[1][0] = true;
+		puzzle[0][0] = true;
 		numFilled = PUZZLE_SIZE * (PUZZLE_SIZE + 1) / 2 - 1;
+		maxFilled = numFilled;
+		minNumFilled = numFilled;
 	}
 	
 	
@@ -40,7 +42,6 @@ public class Puzzle {
 	 * @param j2 col of ending peg position
 	 */
 	public void makeMove(int i1, int j1, int i2, int j2) {
-//		System.out.printf("making move i1:%d j1:%d i2:%d j2:%d filled:%d\n", i1,j1,i2,j2,numFilled);
 		
 		moves[numMoves][0] = i1;
 		moves[numMoves][1] = j1;
@@ -53,6 +54,9 @@ public class Puzzle {
 		
 		numMoves++;
 		numFilled--;
+		totalMoves++;
+		
+//		System.out.printf("made move i1:%d j1:%d i2:%d j2:%d filled:%d moves:%d\n", i1,j1,i2,j2, numFilled, numMoves);
 	}
 	
 	
@@ -61,11 +65,22 @@ public class Puzzle {
 	 * replaces the peg that was jumped over and removed.
 	 */
 	public void backtrackMove() {
+		if(minNumFilled > numFilled) {
+			System.out.printf("backtracked move i1:%d j1:%d i2:%d j2:%d filled:%d moves:%d\n", moves[numMoves-1][0],
+					moves[numMoves-1][1], moves[numMoves-1][2], moves[numMoves-1][3], numFilled, numMoves);
+			drawBoard();
+			minNumFilled = numFilled;
+		}
 		numMoves--;
 		numFilled++;
+		totalMoves++;
 		
-//		System.out.printf("backtracking move i1:%d j1:%d i2:%d j2:%d filled:%d\n", moves[numMoves][0],
-//				moves[numMoves][1], moves[numMoves][2], moves[numMoves][3], numFilled);
+		if(totalMoves % 1000000==0) 
+			System.out.println("Total moves " + totalMoves);
+		
+//		System.out.printf("backtracked move i1:%d j1:%d i2:%d j2:%d filled:%d moves:%d\n", moves[numMoves][0],
+//				moves[numMoves][1], moves[numMoves][2], moves[numMoves][3], numFilled, numMoves);
+		
 		
 		puzzle[ moves[numMoves][0] ][ moves[numMoves][1] ] = false;
 		puzzle[ moves[numMoves][2] ][ moves[numMoves][3] ] = true;
@@ -122,8 +137,11 @@ public class Puzzle {
 					for(int k=0; k<numPossibleMoves; k++) {
 						makeMove(i, j, possibleMoves[k][0], possibleMoves[k][1]);
 						solve();
-						if(numFilled>1)
-							backtrackMove();
+						if(numFilled==1)
+							return;
+						backtrackMove();
+						if(numFilled==maxFilled)
+							System.out.printf("starting point i:%d j:%d\n", i, j);
 					}
 				}
 			}
@@ -179,7 +197,7 @@ public class Puzzle {
 		puzzle.solve();
 		puzzle.printSolution();
 		
-		System.out.printf("\nRun time %d ms", System.currentTimeMillis()-time);
+		System.out.printf("\nRun time %dms total moves:%d", System.currentTimeMillis()-time, puzzle.totalMoves);
 	}
 
 }
