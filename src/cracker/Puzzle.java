@@ -26,7 +26,7 @@ public class Puzzle {
 	 */
 	public void initBoard() {
 		puzzle = new boolean[ PUZZLE_SIZE ][ PUZZLE_SIZE ];
-		puzzle[0][0] = true;
+		puzzle[1][0] = true;
 		numFilled = PUZZLE_SIZE * (PUZZLE_SIZE + 1) / 2 - 1;
 	}
 	
@@ -41,6 +41,7 @@ public class Puzzle {
 	 */
 	public void makeMove(int i1, int j1, int i2, int j2) {
 //		System.out.printf("making move i1:%d j1:%d i2:%d j2:%d filled:%d\n", i1,j1,i2,j2,numFilled);
+		
 		moves[numMoves][0] = i1;
 		moves[numMoves][1] = j1;
 		moves[numMoves][2] = i2;
@@ -89,17 +90,17 @@ public class Puzzle {
 	public int getPossibleMoves(int[][] possibleMoves, int i, int j) {
 		int numPossibleMoves = 0;
 		
-		if(j>1 && !puzzle[i][j-1] && puzzle[i][j-2])
+		if(j>1 && j-2<=i && !puzzle[i][j-1] && puzzle[i][j-2])
 			addPossibleMove(possibleMoves, numPossibleMoves++, i, j-2);
-		if(j<PUZZLE_SIZE-2 && !puzzle[i][j+1] && puzzle[i][j+2])
+		if(j<PUZZLE_SIZE-2 && j+2<=i && !puzzle[i][j+1] && puzzle[i][j+2])
 			addPossibleMove(possibleMoves, numPossibleMoves++, i, j+2);
-		if(i>1 && !puzzle[i-1][j] && puzzle[i-2][j])
+		if(i>1 && j<=i-2 && !puzzle[i-1][j] && puzzle[i-2][j])
 			addPossibleMove(possibleMoves, numPossibleMoves++, i-2, j);
-		if(i<PUZZLE_SIZE-2 && !puzzle[i+1][j] && puzzle[i+2][j])
+		if(i<PUZZLE_SIZE-2 && j<=i+2 && !puzzle[i+1][j] && puzzle[i+2][j])
 			addPossibleMove(possibleMoves, numPossibleMoves++, i+2, j);
-		if(i>1 && j>1 && !puzzle[i-1][j-1] && puzzle[i-2][j-2])
+		if(i>1 && j>1 && j<=i && !puzzle[i-1][j-1] && puzzle[i-2][j-2])
 			addPossibleMove(possibleMoves, numPossibleMoves++, i-2, j-2);
-		if(i<PUZZLE_SIZE-2 && !puzzle[i+1][j+1] && puzzle[i+2][j+2])
+		if(i<PUZZLE_SIZE-2 && j<=i && !puzzle[i+1][j+1] && puzzle[i+2][j+2])
 			addPossibleMove(possibleMoves, numPossibleMoves++, i+2, j+2);
 		
 		return numPossibleMoves;
@@ -149,15 +150,20 @@ public class Puzzle {
 	 * prints the board at the start, and after every move in the solution
 	 */
 	public void printSolution() {
-		initBoard();
-		drawBoard();
-		for(int i=0; i<numFilled-1; i++) {
-			System.out.printf("move:%d  row:%d col:%d -> row:%d col:%d\n", i+1, moves[i][0]+1, moves[i][1]+1,
-					moves[i][2]+1, moves[i][3]+1);
-			puzzle[ moves[i][0] ][ moves[i][1] ] = true;
-			puzzle[ moves[i][2] ][ moves[i][3] ] = false;
-			puzzle[ moves[i][0] + (moves[i][2]-moves[i][0])/2 ][ moves[i][1] + (moves[i][3]-moves[i][1])/2 ] = true;
+		if(numFilled==1) {
+			initBoard();
 			drawBoard();
+			for(int i=0; i<numFilled-1; i++) {
+				System.out.printf("move:%d  row:%d col:%d -> row:%d col:%d\n", i+1, moves[i][0]+1, moves[i][1]+1,
+						moves[i][2]+1, moves[i][3]+1);
+				puzzle[ moves[i][0] ][ moves[i][1] ] = true;
+				puzzle[ moves[i][2] ][ moves[i][3] ] = false;
+				puzzle[ moves[i][0] + (moves[i][2]-moves[i][0])/2 ][ moves[i][1] + (moves[i][3]-moves[i][1])/2 ] = true;
+				drawBoard();
+			}
+		}
+		else {
+			System.out.println("No solution found");
 		}
 	}
 
